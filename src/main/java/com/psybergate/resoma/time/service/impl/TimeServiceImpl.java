@@ -1,5 +1,6 @@
 package com.psybergate.resoma.time.service.impl;
 
+import com.psybergate.people.api.PeopleApi;
 import com.psybergate.resoma.time.entity.Status;
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.repository.TimeEntryRepository;
@@ -22,15 +23,20 @@ public class TimeServiceImpl implements TimeService {
 
     private final TimeEntryRepository timeEntryRepository;
 
+    private final PeopleApi peopleApi;
+
 
     @Autowired
-    public TimeServiceImpl(TimeEntryRepository timeEntryRepository) {
+    public TimeServiceImpl(TimeEntryRepository timeEntryRepository, PeopleApi peopleApi) {
         this.timeEntryRepository = timeEntryRepository;
+        this.peopleApi = peopleApi;
     }
 
     @Override
     @Transactional
     public TimeEntry captureTime(@Valid TimeEntry timeEntry) {
+        if (!peopleApi.validateEmployee(timeEntry.getEmployeeId()))
+            throw new ValidationException("Employee does not exist");
         timeEntry.setStatus(Status.NEW);
         timeEntry.addStatusHistory();
         timeEntry = timeEntryRepository.save(timeEntry);
@@ -52,6 +58,8 @@ public class TimeServiceImpl implements TimeService {
     public TimeEntry updateEntry(@Valid TimeEntry timeEntry) {
         if (timeEntry.isApproved())
             throw new ValidationException("Status can not be APPROVED");
+        if (!peopleApi.validateEmployee(timeEntry.getEmployeeId()))
+            throw new ValidationException("Employee does not exist");
         timeEntry.setStatus(Status.NEW);
         return timeEntryRepository.save(timeEntry);
     }
@@ -65,7 +73,8 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public TimeEntry submitEntry(@Valid TimeEntry timeEntry) {
+    public TimeEntry submitEntry(UUID timeEntryId) {
+        TimeEntry timeEntry = timeEntryRepository.findByIdAndDeleted(timeEntryId, false);
         if (!EnumSet.of(Status.NEW, Status.SUBMITTED, Status.REJECTED).contains(timeEntry.getStatus()))
             throw new ValidationException("Status can only be NEW, SUBMITTED or REJECTED");
         timeEntry.setStatus(Status.SUBMITTED);
@@ -77,7 +86,8 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public TimeEntry approveEntry(@Valid TimeEntry timeEntry) {
+    public TimeEntry approveEntry(UUID timeEntryId) {
+        TimeEntry timeEntry = timeEntryRepository.findByIdAndDeleted(timeEntryId, false);
         if (!EnumSet.of(Status.SUBMITTED).contains(timeEntry.getStatus()))
             throw new ValidationException("Status can only be SUBMITTED");
         timeEntry.setStatus(Status.APPROVED);
@@ -88,7 +98,8 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     @Transactional
-    public TimeEntry rejectEntry(@Valid TimeEntry timeEntry) {
+    public TimeEntry rejectEntry(UUID timeEntryId) {
+        TimeEntry timeEntry = timeEntryRepository.findByIdAndDeleted(timeEntryId, false);
         if (!EnumSet.of(Status.SUBMITTED).contains(timeEntry.getStatus()))
             throw new ValidationException("Status can only be SUBMITTED");
         timeEntry.setStatus(Status.REJECTED);
@@ -101,7 +112,7 @@ public class TimeServiceImpl implements TimeService {
     @Transactional
     public List<TimeEntry> submitEntries(List<@Valid TimeEntry> timeEntries) {
         List<TimeEntry> submittedEntries = new ArrayList<>();
-        timeEntries.forEach(timeEntry -> submittedEntries.add(submitEntry(timeEntry)));
+        timeEntries.forEach(timeEntry -> submittedEntries.add(submitEntry(timeEntry.getId())));
         return submittedEntries;
     }
 
@@ -109,7 +120,7 @@ public class TimeServiceImpl implements TimeService {
     @Transactional
     public List<TimeEntry> approveEntries(List<@Valid TimeEntry> timeEntries) {
         List<TimeEntry> submittedEntries = new ArrayList<>();
-        timeEntries.forEach(timeEntry -> submittedEntries.add(approveEntry(timeEntry)));
+        timeEntries.forEach(timeEntry -> submittedEntries.add(approveEntry(timeEntry.getId())));
         return submittedEntries;
     }
 
@@ -117,7 +128,7 @@ public class TimeServiceImpl implements TimeService {
     @Transactional
     public List<TimeEntry> rejectEntries(List<@Valid TimeEntry> entries) {
         List<TimeEntry> rejectedEntries = new ArrayList<>();
-        entries.forEach(timeEntry -> rejectedEntries.add(rejectEntry(timeEntry)));
+        entries.forEach(timeEntry -> rejectedEntries.add(rejectEntry(timeEntry.getId())));
         return rejectedEntries;
     }
 

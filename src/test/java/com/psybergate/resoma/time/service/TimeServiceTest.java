@@ -1,5 +1,6 @@
 package com.psybergate.resoma.time.service;
 
+import com.psybergate.people.api.PeopleApi;
 import com.psybergate.resoma.time.entity.Status;
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.repository.TimeEntryRepository;
@@ -26,15 +27,16 @@ class TimeServiceTest {
     @Mock
     private TimeEntryRepository mockTimeEntryRepository;
     @Mock
-
     private TimeService timeService;
+    @Mock
+    private PeopleApi mockPeopleApi;
     private TimeEntry testTimeEntry;
     private TimeEntry testTimeEntry2;
     private TimeEntry testTimeEntry3;
 
     @BeforeEach
     void init() {
-        timeService = new TimeServiceImpl(mockTimeEntryRepository);
+        timeService = new TimeServiceImpl(mockTimeEntryRepository, mockPeopleApi);
         testTimeEntry = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), "descr1", 100, LocalDate.now(), false);
         testTimeEntry2 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), "descr2", 100, LocalDate.now(), false);
         testTimeEntry3 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), "descr3", 200, LocalDate.now(), false);
@@ -44,7 +46,7 @@ class TimeServiceTest {
     void shouldCaptureTimeEntry_whenCaptureTime() {
         //Arrange
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
-
+        when(mockPeopleApi.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
         //Act
         TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
 
@@ -70,6 +72,7 @@ class TimeServiceTest {
     void shouldUpdateTimeEntry_whenUpdatingEntry() {
         //Arrange
         when(mockTimeEntryRepository.save(any(TimeEntry.class))).thenReturn(testTimeEntry);
+        when(mockPeopleApi.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
 
         //Act
         TimeEntry updateEntry = timeService.updateEntry(testTimeEntry);
@@ -119,9 +122,10 @@ class TimeServiceTest {
     void shouldSubmitTimeEntry_whenSubmittingEntry() {
         //Arrange
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
 
         //Act
-        testTimeEntry = timeService.submitEntry(testTimeEntry);
+        testTimeEntry = timeService.submitEntry(testTimeEntry.getId());
 
         //Assert
         testTimeEntry.getStatusHistory().forEach(s -> assertEquals(Status.SUBMITTED, s.getStatus()));
@@ -134,19 +138,21 @@ class TimeServiceTest {
     void shouldThrowValidationException_whenSubmittingApprovedEntry() {
         //Arrange
         testTimeEntry.setStatus(Status.APPROVED);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
 
         //Act and Assert
-        assertThrows(ValidationException.class, () -> timeService.submitEntry(testTimeEntry));
+        assertThrows(ValidationException.class, () -> timeService.submitEntry(testTimeEntry.getId()));
     }
 
     @Test
     void shouldApproveTimeEntry_whenApprovingEntry() {
         //Arrange
         testTimeEntry.setStatus(Status.SUBMITTED);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
 
         //Act
-        testTimeEntry = timeService.approveEntry(testTimeEntry);
+        testTimeEntry = timeService.approveEntry(testTimeEntry.getId());
 
         //Assert
         verify(mockTimeEntryRepository).save(testTimeEntry);
@@ -159,27 +165,30 @@ class TimeServiceTest {
     void shouldThrowValidationException_whenApprovingNewEntry() {
         //Arrange
         testTimeEntry.setStatus(Status.NEW);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
 
         //Act and Assert
-        assertThrows(ValidationException.class, () -> timeService.approveEntry(testTimeEntry));
+        assertThrows(ValidationException.class, () -> timeService.approveEntry(testTimeEntry.getId()));
     }
 
     @Test
     void shouldThrowValidationException_whenApprovingApprovedEntry() {
         //Arrange
         testTimeEntry.setStatus(Status.APPROVED);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
 
         //Act and Assert
-        assertThrows(ValidationException.class, () -> timeService.approveEntry(testTimeEntry));
+        assertThrows(ValidationException.class, () -> timeService.approveEntry(testTimeEntry.getId()));
     }
 
     @Test
     void shouldThrowValidationException_whenApprovingRejectedEntry() {
         //Arrange
         testTimeEntry.setStatus(Status.REJECTED);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
 
         //Act and Assert
-        assertThrows(ValidationException.class, () -> timeService.approveEntry(testTimeEntry));
+        assertThrows(ValidationException.class, () -> timeService.approveEntry(testTimeEntry.getId()));
     }
 
     @Test
@@ -187,10 +196,11 @@ class TimeServiceTest {
         //Arrange
         testTimeEntry.setStatus(Status.SUBMITTED);
         testTimeEntry.setStatusReason("Test Reason");
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
 
         //Act
-        testTimeEntry = timeService.rejectEntry(testTimeEntry);
+        testTimeEntry = timeService.rejectEntry(testTimeEntry.getId());
 
         //Assert
         verify(mockTimeEntryRepository).save(testTimeEntry);
@@ -203,27 +213,30 @@ class TimeServiceTest {
     void shouldThrowValidationException_whenRejectingNewEntry() {
         //Arrange
         testTimeEntry.setStatus(Status.NEW);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
 
         //Act and Assert
-        assertThrows(ValidationException.class, () -> timeService.rejectEntry(testTimeEntry));
+        assertThrows(ValidationException.class, () -> timeService.rejectEntry(testTimeEntry.getId()));
     }
 
     @Test
     void shouldThrowValidationException_whenRejectingApprovedEntry() {
         //Arrange
         testTimeEntry.setStatus(Status.APPROVED);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
 
         //Act and Assert
-        assertThrows(ValidationException.class, () -> timeService.rejectEntry(testTimeEntry));
+        assertThrows(ValidationException.class, () -> timeService.rejectEntry(testTimeEntry.getId()));
     }
 
     @Test
     void shouldThrowValidationException_whenRejectingRejectedEntry() {
         //Arrange
         testTimeEntry.setStatus(Status.REJECTED);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
 
         //Act and Assert
-        assertThrows(ValidationException.class, () -> timeService.rejectEntry(testTimeEntry));
+        assertThrows(ValidationException.class, () -> timeService.rejectEntry(testTimeEntry.getId()));
     }
 
     @Test
@@ -244,6 +257,9 @@ class TimeServiceTest {
     void shouldSubmitAllTimeEntries_wheSubmittingEntries() {
         //Arrange
         List<TimeEntry> timeEntries = Arrays.asList(testTimeEntry, testTimeEntry2, testTimeEntry3);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry2.getId(), false)).thenReturn(testTimeEntry2);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry3.getId(), false)).thenReturn(testTimeEntry3);
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
         when(mockTimeEntryRepository.save(testTimeEntry2)).thenReturn(testTimeEntry2);
         when(mockTimeEntryRepository.save(testTimeEntry3)).thenReturn(testTimeEntry3);
@@ -261,6 +277,9 @@ class TimeServiceTest {
         //Arrange
         List<TimeEntry> timeEntries = Arrays.asList(testTimeEntry, testTimeEntry2, testTimeEntry3);
         timeEntries.forEach(timeEntry -> timeEntry.setStatus(Status.SUBMITTED));
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry2.getId(), false)).thenReturn(testTimeEntry2);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry3.getId(), false)).thenReturn(testTimeEntry3);
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
         when(mockTimeEntryRepository.save(testTimeEntry2)).thenReturn(testTimeEntry2);
         when(mockTimeEntryRepository.save(testTimeEntry3)).thenReturn(testTimeEntry3);
@@ -284,6 +303,10 @@ class TimeServiceTest {
         //Arrange
         List<TimeEntry> timeEntries = Arrays.asList(testTimeEntry, testTimeEntry2, testTimeEntry3);
         timeEntries.forEach(timeEntry -> timeEntry.setStatus(Status.SUBMITTED));
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry.getId(), false)).thenReturn(testTimeEntry);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry2.getId(), false)).thenReturn(testTimeEntry2);
+        when(mockTimeEntryRepository.findByIdAndDeleted(testTimeEntry3.getId(), false)).thenReturn(testTimeEntry3);
+        when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
         when(mockTimeEntryRepository.save(testTimeEntry2)).thenReturn(testTimeEntry2);
         when(mockTimeEntryRepository.save(testTimeEntry3)).thenReturn(testTimeEntry3);

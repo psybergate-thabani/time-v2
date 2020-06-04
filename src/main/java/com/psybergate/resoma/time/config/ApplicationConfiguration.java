@@ -1,6 +1,8 @@
 package com.psybergate.resoma.time.config;
 
 
+import com.psybergate.people.api.PeopleApi;
+import com.psybergate.people.api.impl.PeopleApiRestImpl;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,5 +28,10 @@ public class ApplicationConfiguration {
         LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
         bean.setValidationMessageSource(messageSource());
         return bean;
+    }
+
+    @Bean
+    public PeopleApi peopleApi(){
+        return new PeopleApiRestImpl();
     }
 }

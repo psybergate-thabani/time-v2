@@ -17,11 +17,11 @@ public interface TimeService {
 
     void deleteEntry(UUID entryId);
 
-    TimeEntry submitEntry(TimeEntry timeEntry);
+    TimeEntry submitEntry(UUID timeEntryId);
 
-    TimeEntry approveEntry(TimeEntry timeEntry);
+    TimeEntry approveEntry(UUID timeEntryId);
 
-    TimeEntry rejectEntry(TimeEntry timeEntry);
+    TimeEntry rejectEntry(UUID timeEntryId);
 
     List<TimeEntry> approveEntries(List<TimeEntry> entries);
 

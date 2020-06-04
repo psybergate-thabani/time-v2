@@ -54,7 +54,7 @@ public class TimeController {
                                                      @RequestBody @Valid TimeEntry timeEntry) {
         if (!timeEntryId.equals(timeEntry.getId()))
             throw new ValidationException("id in url path does not match time entry id in request body");
-        return ResponseEntity.ok(timeService.submitEntry(timeEntry));
+        return ResponseEntity.ok(timeService.submitEntry(timeEntryId));
     }
 
     @PutMapping(path = "v1/time-entries/submit")
@@ -66,7 +66,7 @@ public class TimeController {
     public ResponseEntity<TimeEntry> approveTimeEntry(@PathVariable UUID timeEntryId, @RequestBody @Valid TimeEntry timeEntry) {
         if (!timeEntryId.equals(timeEntry.getId()))
             throw new ValidationException("id in url path does not match time entry id in request body");
-        return ResponseEntity.ok(timeService.approveEntry(timeEntry));
+        return ResponseEntity.ok(timeService.approveEntry(timeEntryId));
     }
 
     @PutMapping(path = "v1/time-entries/approve")
@@ -78,7 +78,7 @@ public class TimeController {
     public ResponseEntity<TimeEntry> rejectTimeEntry(@PathVariable(name = "id") UUID entryId, @RequestBody @Valid TimeEntry timeEntry) {
         if (!entryId.equals(timeEntry.getId()))
             throw new ValidationException("id in url path does not match time entry id in request body");
-        return ResponseEntity.ok(timeService.rejectEntry(timeEntry));
+        return ResponseEntity.ok(timeService.rejectEntry(entryId));
     }
 
     @PutMapping(path = "v1/time-entries/reject")
@@ -86,4 +86,3 @@ public class TimeController {
         return ResponseEntity.ok(timeService.rejectEntries(timeEntries));
     }
 }
-

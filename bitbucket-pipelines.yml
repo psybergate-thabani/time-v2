@@ -17,6 +17,8 @@ pipelines:
           - maven
         script:
           - mvn install -B # -B batch mode makes Maven less verbose
+        artifacts:
+          - target/**
     - step:
         name: Docker build
         caches:

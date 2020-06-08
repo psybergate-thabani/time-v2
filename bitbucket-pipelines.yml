@@ -19,6 +19,8 @@ pipelines:
           - mvn install -B verify # -B batch mode makes Maven less verbose
     - step:
         name: Docker build
+        caches:
+          - docker
         script:
           - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           - docker build -t $IMAGE_NAME .

@@ -10,13 +10,15 @@ pipelines:
         caches:
           - maven
         script:
-          - mvn clean -B verify # -B batch mode makes Maven less verbose
+          - mvn clean -B # -B batch mode makes Maven less verbose
     - step:
         name: Test and Package
         caches:
           - maven
         script:
-          - mvn install -B verify # -B batch mode makes Maven less verbose
+          - mvn install -B # -B batch mode makes Maven less verbose
+        artifacts:
+          - target/**
     - step:
         name: Docker build
         caches:

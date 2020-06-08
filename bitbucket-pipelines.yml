@@ -11,8 +11,6 @@ pipelines:
           - maven
         script:
           - mvn clean -B verify # -B batch mode makes Maven less verbose
-        artifacts:
-          - target/**
     - step:
         name: Test and Package
         caches:

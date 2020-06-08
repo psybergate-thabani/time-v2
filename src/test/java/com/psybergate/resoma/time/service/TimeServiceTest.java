@@ -3,6 +3,8 @@ package com.psybergate.resoma.time.service;
 import com.psybergate.resoma.time.entity.Status;
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.repository.TimeEntryRepository;
+import com.psybergate.resoma.time.resource.EmployeeResource;
+import com.psybergate.resoma.time.resource.ProjectResource;
 import com.psybergate.resoma.time.service.impl.TimeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.validation.ValidationException;
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +29,9 @@ class TimeServiceTest {
     @Mock
     private TimeEntryRepository mockTimeEntryRepository;
     @Mock
+    private EmployeeResource mockEmployeeResource;
+    @Mock
+    private ProjectResource mockProjectResource;
 
     private TimeService timeService;
     private TimeEntry testTimeEntry;
@@ -34,23 +40,64 @@ class TimeServiceTest {
 
     @BeforeEach
     void init() {
-        timeService = new TimeServiceImpl(mockTimeEntryRepository);
-        testTimeEntry = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), "descr1", 100, LocalDate.now(), false);
-        testTimeEntry2 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), "descr2", 100, LocalDate.now(), false);
-        testTimeEntry3 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), "descr3", 200, LocalDate.now(), false);
+        timeService = new TimeServiceImpl(mockTimeEntryRepository, mockEmployeeResource, mockProjectResource);
+        testTimeEntry = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr1", 100, LocalDate.now(), false);
+        testTimeEntry2 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr2", 100, LocalDate.now(), false);
+        testTimeEntry3 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr3", 200, LocalDate.now(), false);
     }
 
     @Test
-    void shouldCaptureTimeEntry_whenCaptureTime() {
+    void shouldCaptureTimeEntry_whenGivenTimeEntry() {
         //Arrange
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
+        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
+        when(mockProjectResource.validateProject(testTimeEntry.getProjectId())).thenReturn(true);
+        when(mockProjectResource.validateTask(testTimeEntry.getProjectId(), testTimeEntry.getTaskId())).thenReturn(true);
 
         //Act
         TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
 
-        //Assert
+        //Assert and Verify
         assertNotNull(timeEntry);
         assertEquals(Status.NEW, timeEntry.getStatus());
+        verify(mockTimeEntryRepository).save(testTimeEntry);
+        verify(mockEmployeeResource).validateEmployee(testTimeEntry.getEmployeeId());
+        verify(mockProjectResource).validateTask(testTimeEntry.getProjectId(), timeEntry.getTaskId());
+    }
+
+    @Test
+    void shouldThrowValidationException_whenGivenTimeEntryWithEmployeeIdThatDoesNotExist() {
+        //Arrange
+        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(false);
+
+        //Act
+        assertThrows(ValidationException.class, () -> {
+            TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
+        });
+    }
+
+    @Test
+    void shouldInvocationTargetException_whenGivenTimeEntryWithTaskThatDosesNotExist() {
+        //Arrange
+        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
+        when(mockProjectResource.validateProject(testTimeEntry.getProjectId())).thenReturn(true);
+        when(mockProjectResource.validateTask(testTimeEntry.getProjectId(), testTimeEntry.getTaskId())).thenReturn(false);
+
+        //Act
+        assertThrows(ValidationException.class, () -> {
+            TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
+        });
+    }
+
+    @Test
+    void shouldThrowValidationException_whenGivenTimeEntryWithInvalidEmployeeId() {
+        //Arrange
+        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(false);
+
+        //Act and Assert
+        assertThrows(ValidationException.class, () -> {
+            TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
+        });
     }
 
     @Test

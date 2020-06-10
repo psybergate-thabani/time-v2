@@ -72,7 +72,11 @@
 				<groupId>org.liquibase</groupId>
 				<artifactId>liquibase-maven-plugin</artifactId>
 				<configuration>
+					<changeLogFile>src/main/resources/db/changelog/changelog-master.xml</changeLogFile>
 					<propertyFile>src/main/resources/application.properties</propertyFile>
+					<url>jdbc:postgresql://localhost/time</url>
+					<username>admin</username>
+					<password>password</password>
 				</configuration>
 			</plugin>
 		</plugins>

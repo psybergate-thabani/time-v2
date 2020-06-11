@@ -11,7 +11,7 @@
                 <constraints nullable="false" primaryKey="true" unique="true"/>
             </column>
             <column name="version" type="bigint">
-                <constraints nullable="false" primaryKey="false" unique="true"/>
+                <constraints nullable="false" primaryKey="false" unique="false"/>
             </column>
             <column name="deleted" type="boolean">
                 <constraints primaryKey="false" unique="false"/>
@@ -59,7 +59,7 @@
                 <constraints nullable="false" primaryKey="true" unique="true"/>
             </column>
             <column name="version" type="bigint">
-                <constraints nullable="false" primaryKey="false" unique="true"/>
+                <constraints nullable="false" primaryKey="false" unique="false"/>
             </column>
             <column name="deleted" type="boolean">
                 <constraints primaryKey="false" unique="false"/>

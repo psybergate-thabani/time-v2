@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class EmployeeResourceImpTest {
+public class EmployeeResourceTest {
 
     private EmployeeResource employeeResourceImp;
     @Mock
@@ -27,7 +27,7 @@ public class EmployeeResourceImpTest {
     @BeforeEach
     void setup() {
         employeeResourceImp = new EmployeeResourceImp(restTemplate);
-        employeeUrl = "http://localhost:8080/api/people/v1/employees/valid/%s?deleted=false";
+        employeeUrl = "http://localhost:8081/api/people/v1/employees/%s/valid?deleted=false";
     }
 
     @Test

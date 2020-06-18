@@ -4,7 +4,6 @@ import com.psybergate.resoma.time.entity.Status;
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.repository.TimeEntryRepository;
 import com.psybergate.resoma.time.resource.EmployeeResource;
-import com.psybergate.resoma.time.resource.ProjectResource;
 import com.psybergate.resoma.time.service.TimeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +23,12 @@ public class TimeServiceImpl implements TimeService {
 
     private final TimeEntryRepository timeEntryRepository;
     private final EmployeeResource employeeResource;
-    private final ProjectResource projectResource;
 
     @Autowired
     public TimeServiceImpl(TimeEntryRepository timeEntryRepository,
-                           EmployeeResource employeeResource,
-                           ProjectResource projectResource) {
+                           EmployeeResource employeeResource) {
         this.timeEntryRepository = timeEntryRepository;
         this.employeeResource = employeeResource;
-        this.projectResource = projectResource;
     }
 
     @Override
@@ -40,12 +36,6 @@ public class TimeServiceImpl implements TimeService {
     public TimeEntry captureTime(@Valid TimeEntry timeEntry) {
         if (!employeeResource.validateEmployee(timeEntry.getEmployeeId())) {
             throw new ValidationException("Employee id does no exist");
-        }
-        if (!projectResource.validateProject(timeEntry.getProjectId())) {
-            throw new ValidationException("Task id does no exist");
-        }
-        if (!projectResource.validateTask(timeEntry.getProjectId(), timeEntry.getTaskId())) {
-            throw new ValidationException("Task id does no exist");
         }
         timeEntry.setStatus(Status.NEW);
         timeEntry.addStatusHistory();

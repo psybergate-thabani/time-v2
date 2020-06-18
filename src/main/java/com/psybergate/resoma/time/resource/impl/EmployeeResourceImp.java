@@ -21,7 +21,7 @@ public class EmployeeResourceImp implements EmployeeResource {
     @SneakyThrows
     @Override
     public boolean validateEmployee(UUID employeeId) {
-        String url = String.format("http://localhost:8081/api/people/v1/employees/%s/valid?deleted=false", employeeId);
+        String url = String.format("http://localhost:8080/api/people/v1/employees/%s/valid?deleted=false", employeeId);
         Boolean validate = restTemplate.getForObject(url, Boolean.class);
         if (Objects.isNull(validate))
             throw new InvocationTargetException(new Throwable(), "Unexpected type returned");

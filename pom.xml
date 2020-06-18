@@ -79,5 +79,6 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<finalName>time</finalName>
 	</build>
 </project>

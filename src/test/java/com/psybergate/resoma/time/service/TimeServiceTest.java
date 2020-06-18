@@ -35,9 +35,9 @@ class TimeServiceTest {
     @BeforeEach
     void init() {
         timeService = new TimeServiceImpl(mockTimeEntryRepository);
-        testTimeEntry = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), "descr1", 100, LocalDate.now(), false);
-        testTimeEntry2 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), "descr2", 100, LocalDate.now(), false);
-        testTimeEntry3 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), "descr3", 200, LocalDate.now(), false);
+        testTimeEntry = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr1", 100, LocalDate.now(), false);
+        testTimeEntry2 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr2", 100, LocalDate.now(), false);
+        testTimeEntry3 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr3", 200, LocalDate.now(), false);
     }
 
     @Test

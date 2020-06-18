@@ -25,6 +25,10 @@ public class TimeEntry extends BaseEntity {
     @Column(name = "employee_id", nullable = false)
     private UUID employeeId;
 
+    @NotNull(message = "{project.notnull}")
+    @Column(name = "project_id", nullable = false)
+    private UUID projectId;
+
     @NotNull(message = "{task.notnull}")
     @Column(name = "task_id", nullable = false)
     private UUID taskId;
@@ -54,8 +58,9 @@ public class TimeEntry extends BaseEntity {
     public TimeEntry() {
     }
 
-    public TimeEntry(UUID employeeId, UUID taskId, String description, int period, LocalDate date, boolean deleted) {
+    public TimeEntry(UUID employeeId, UUID projectId, UUID taskId, String description, int period, LocalDate date, boolean deleted) {
         this.employeeId = employeeId;
+        this.projectId = projectId;
         this.taskId = taskId;
         this.description = description;
         this.period = period;

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet author="Thabani" id="changelog-1.0">
+        <createTable tableName="TimeEntry">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" unique="true"/>
+            </column>
+            <column name="version" type="Long">
+                <constraints nullable="false" primaryKey="false" unique="true"/>
+            </column>
+            <column name="deleted" type="boolean">
+                <constraints primaryKey="false" unique="false"/>
+            </column>
+            <column name="created" type="LocalDateTime">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="created_by" type="String">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="last_modified_by" type="String">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="last_modified_date" type="LocalDateTime">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="employee_id" type="UUID">
+                <constraints nullable="false" primaryKey="false" unique="false"/>
+            </column>
+            <column name="task_id" type="UUID">
+                <constraints nullable="false" primaryKey="false" unique="false"/>
+            </column>
+            <column name="status" type="String">
+                <constraints nullable="false" primaryKey="false" unique="false"/>
+            </column>
+            <column name="status_reason" type="String">
+                <constraints nullable="false" primaryKey="false" unique="false"/>
+            </column>
+            <column name="description" type="String">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="period" type="int">
+                <constraints primaryKey="false" unique="false"/>
+            </column>
+            <column name="date" type="LocalDate">
+                <constraints nullable="false" primaryKey="false" unique="false"/>
+            </column>
+            <column name="time_entry_id" type="UUID">
+                <constraints nullable="false" primaryKey="false" unique="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="TimeEntry">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" unique="true"/>
+            </column>
+            <column name="version" type="Long">
+                <constraints nullable="false" primaryKey="false" unique="true"/>
+            </column>
+            <column name="deleted" type="boolean">
+                <constraints primaryKey="false" unique="false"/>
+            </column>
+            <column name="created" type="LocalDateTime">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="created_by" type="String">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="last_modified_by" type="String">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="last_modified_date" type="LocalDateTime">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="status" type="String">
+                <constraints nullable="false" primaryKey="false" unique="false"/>
+            </column>
+            <column name="status_update_reason" type="String">
+                <constraints nullable="true" primaryKey="false" unique="false"/>
+            </column>
+            <column name="time_stamp" type="LocalDateTime">
+                <constraints nullable="false" primaryKey="false" unique="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

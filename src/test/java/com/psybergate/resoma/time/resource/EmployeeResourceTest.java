@@ -27,7 +27,7 @@ public class EmployeeResourceTest {
     @BeforeEach
     void setup() {
         employeeResourceImp = new EmployeeResourceImp(restTemplate);
-        employeeUrl = "http://localhost:8080/api/people/v1/employees/%s/valid?deleted=false";
+        employeeUrl = "http://people:8083/api/people/v1/employees/%s/valid?deleted=false";
     }
 
     @Test

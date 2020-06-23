@@ -3,6 +3,7 @@ package com.psybergate.resoma.time.service;
 import com.psybergate.resoma.time.entity.Status;
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.repository.TimeEntryRepository;
+import com.psybergate.resoma.time.resource.EmployeeResource;
 import com.psybergate.resoma.time.service.impl.TimeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ class TimeServiceTest {
     @Mock
     private TimeEntryRepository mockTimeEntryRepository;
     @Mock
+    private EmployeeResource mockEmployeeResource;
 
     private TimeService timeService;
     private TimeEntry testTimeEntry;
@@ -34,23 +36,48 @@ class TimeServiceTest {
 
     @BeforeEach
     void init() {
-        timeService = new TimeServiceImpl(mockTimeEntryRepository);
+        timeService = new TimeServiceImpl(mockTimeEntryRepository, mockEmployeeResource);
         testTimeEntry = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr1", 100, LocalDate.now(), false);
         testTimeEntry2 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr2", 100, LocalDate.now(), false);
         testTimeEntry3 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr3", 200, LocalDate.now(), false);
     }
 
     @Test
-    void shouldCaptureTimeEntry_whenCaptureTime() {
+    void shouldCaptureTimeEntry_whenGivenTimeEntry() {
         //Arrange
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
+        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
 
         //Act
         TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
 
-        //Assert
+        //Assert and Verify
         assertNotNull(timeEntry);
         assertEquals(Status.NEW, timeEntry.getStatus());
+        verify(mockTimeEntryRepository).save(testTimeEntry);
+        verify(mockEmployeeResource).validateEmployee(testTimeEntry.getEmployeeId());
+    }
+
+    @Test
+    void shouldThrowValidationException_whenGivenTimeEntryWithEmployeeIdThatDoesNotExist() {
+        //Arrange
+        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(false);
+
+        //Act
+        assertThrows(ValidationException.class, () -> {
+            TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
+        });
+    }
+
+    @Test
+    void shouldThrowValidationException_whenGivenTimeEntryWithInvalidEmployeeId() {
+        //Arrange
+        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(false);
+
+        //Act and Assert
+        assertThrows(ValidationException.class, () -> {
+            TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
+        });
     }
 
     @Test

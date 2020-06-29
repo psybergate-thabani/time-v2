@@ -1,9 +1,11 @@
 package com.psybergate.resoma.time.service;
 
+import com.psybergate.resoma.time.dto.ValidationDTO;
 import com.psybergate.resoma.time.entity.Status;
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.repository.TimeEntryRepository;
 import com.psybergate.resoma.time.resource.EmployeeResource;
+import com.psybergate.resoma.time.resource.ProjectServiceClient;
 import com.psybergate.resoma.time.service.impl.TimeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,9 @@ class TimeServiceTest {
     @Mock
     private EmployeeResource mockEmployeeResource;
 
+    @Mock
+    private ProjectServiceClient projectServiceClient;
+
     private TimeService timeService;
     private TimeEntry testTimeEntry;
     private TimeEntry testTimeEntry2;
@@ -36,7 +41,7 @@ class TimeServiceTest {
 
     @BeforeEach
     void init() {
-        timeService = new TimeServiceImpl(mockTimeEntryRepository, mockEmployeeResource);
+        timeService = new TimeServiceImpl(mockTimeEntryRepository, mockEmployeeResource, projectServiceClient);
         testTimeEntry = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr1", 100, LocalDate.now(), false);
         testTimeEntry2 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr2", 100, LocalDate.now(), false);
         testTimeEntry3 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr3", 200, LocalDate.now(), false);
@@ -47,7 +52,7 @@ class TimeServiceTest {
         //Arrange
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
         when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
-
+        when(projectServiceClient.validateProject(testTimeEntry.getProjectId())).thenReturn(new ValidationDTO(true));
         //Act
         TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
 

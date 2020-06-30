@@ -16,7 +16,7 @@ pipelines:
         caches:
           - maven
         script:
-          - mvn install -B # -B batch mode makes Maven less verbose
+          - mvn install -P dev -B # -B batch mode makes Maven less verbose
         artifacts:
           - target/**
     - step:

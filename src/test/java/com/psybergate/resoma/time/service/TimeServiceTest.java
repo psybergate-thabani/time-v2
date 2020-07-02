@@ -53,6 +53,7 @@ class TimeServiceTest {
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
         when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
         when(projectServiceClient.validateProject(testTimeEntry.getProjectId())).thenReturn(new ValidationDTO(true));
+        when(projectServiceClient.validateTask(testTimeEntry.getProjectId(), testTimeEntry.getTaskId())).thenReturn(new ValidationDTO(true));
         //Act
         TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
 
@@ -67,6 +68,31 @@ class TimeServiceTest {
     void shouldThrowValidationException_whenGivenTimeEntryWithEmployeeIdThatDoesNotExist() {
         //Arrange
         when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(false);
+
+        //Act
+        assertThrows(ValidationException.class, () -> {
+            TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
+        });
+    }
+
+    @Test
+    void shouldThrowValidationException_whenGivenTimeEntryWithProjectIdThatDoesNotExist() {
+        //Arrange
+        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
+        when(projectServiceClient.validateProject(testTimeEntry.getProjectId())).thenReturn(new ValidationDTO(false));
+
+        //Act
+        assertThrows(ValidationException.class, () -> {
+            TimeEntry timeEntry = timeService.captureTime(testTimeEntry);
+        });
+    }
+
+    @Test
+    void shouldThrowValidationException_whenGivenTimeEntryWithTaskIdThatDoesNotExist() {
+        //Arrange
+        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
+        when(projectServiceClient.validateProject(testTimeEntry.getProjectId())).thenReturn(new ValidationDTO(true));
+        when(projectServiceClient.validateTask(testTimeEntry.getProjectId(), testTimeEntry.getTaskId())).thenReturn(new ValidationDTO(false));
 
         //Act
         assertThrows(ValidationException.class, () -> {

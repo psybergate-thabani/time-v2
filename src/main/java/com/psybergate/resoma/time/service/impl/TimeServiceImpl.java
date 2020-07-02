@@ -46,6 +46,10 @@ public class TimeServiceImpl implements TimeService {
         if (!validationDTO.getExist()) {
             throw new ValidationException("Project id does no exist");
         }
+        validationDTO = projectServiceClient.validateTask(timeEntry.getProjectId(), timeEntry.getTaskId());
+        if (!validationDTO.getExist()) {
+            throw new ValidationException("Task id does no exist");
+        }
         timeEntry.setStatus(Status.NEW);
         timeEntry.addStatusHistory();
         timeEntry = timeEntryRepository.save(timeEntry);

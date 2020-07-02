@@ -13,4 +13,7 @@ public interface ProjectServiceClient {
     @GetMapping(path = "/v1/project-entries/{projectId}/validate")
     ValidationDTO validateProject(@PathVariable UUID projectId);
 
+    @GetMapping("v1/project-entries/{projectId}/tasks/{taskId}/validate")
+    ValidationDTO validateTask(@PathVariable UUID projectId, @PathVariable UUID taskId);
+
 }

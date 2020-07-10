@@ -6,6 +6,7 @@ import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.repository.TimeEntryRepository;
 import com.psybergate.resoma.time.resource.EmployeeResource;
 import com.psybergate.resoma.time.resource.ProjectServiceClient;
+import com.psybergate.resoma.time.resource.ProjectServiceClientTest;
 import com.psybergate.resoma.time.service.impl.TimeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

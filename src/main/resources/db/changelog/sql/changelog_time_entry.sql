@@ -1,6 +1,6 @@
 --liquibase formatted sql
 --changeset thabani:create_time_entry_table
-CREATE TABLE time_entry(
+CREATE TABLE IF NOT EXISTS time_entry(
     id                  UUID PRIMARY KEY,
     version             BIGINT NOT NULL,
     deleted             BOOLEAN,

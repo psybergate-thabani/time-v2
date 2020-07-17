@@ -4,7 +4,7 @@ import com.psybergate.resoma.time.dto.ValidationDTO;
 import com.psybergate.resoma.time.entity.Status;
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.repository.TimeEntryRepository;
-import com.psybergate.resoma.time.resource.EmployeeResource;
+import com.psybergate.resoma.time.resource.PeopleServiceClient;
 import com.psybergate.resoma.time.resource.ProjectServiceClient;
 import com.psybergate.resoma.time.service.impl.TimeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +29,7 @@ class TimeServiceTest {
     @Mock
     private TimeEntryRepository mockTimeEntryRepository;
     @Mock
-    private EmployeeResource mockEmployeeResource;
+    private PeopleServiceClient mockPeopleServiceClient;
 
     @Mock
     private ProjectServiceClient projectServiceClient;
@@ -41,7 +41,7 @@ class TimeServiceTest {
 
     @BeforeEach
     void init() {
-        timeService = new TimeServiceImpl(mockTimeEntryRepository, mockEmployeeResource, projectServiceClient);
+        timeService = new TimeServiceImpl(mockTimeEntryRepository, mockPeopleServiceClient, projectServiceClient);
         testTimeEntry = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr1", 100, LocalDate.now(), false);
         testTimeEntry2 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr2", 100, LocalDate.now(), false);
         testTimeEntry3 = new TimeEntry(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "descr3", 200, LocalDate.now(), false);
@@ -51,7 +51,7 @@ class TimeServiceTest {
     void shouldCaptureTimeEntry_whenGivenTimeEntry() {
         //Arrange
         when(mockTimeEntryRepository.save(testTimeEntry)).thenReturn(testTimeEntry);
-        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
+        when(mockPeopleServiceClient.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(new ValidationDTO(true));
         when(projectServiceClient.validateProject(testTimeEntry.getProjectId())).thenReturn(new ValidationDTO(true));
         when(projectServiceClient.validateTask(testTimeEntry.getProjectId(), testTimeEntry.getTaskId())).thenReturn(new ValidationDTO(true));
         //Act
@@ -61,13 +61,13 @@ class TimeServiceTest {
         assertNotNull(timeEntry);
         assertEquals(Status.NEW, timeEntry.getStatus());
         verify(mockTimeEntryRepository).save(testTimeEntry);
-        verify(mockEmployeeResource).validateEmployee(testTimeEntry.getEmployeeId());
+        verify(mockPeopleServiceClient).validateEmployee(testTimeEntry.getEmployeeId());
     }
 
     @Test
     void shouldThrowValidationException_whenGivenTimeEntryWithEmployeeIdThatDoesNotExist() {
         //Arrange
-        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(false);
+        when(mockPeopleServiceClient.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(new ValidationDTO(false));
 
         //Act
         assertThrows(ValidationException.class, () -> {
@@ -78,7 +78,7 @@ class TimeServiceTest {
     @Test
     void shouldThrowValidationException_whenGivenTimeEntryWithProjectIdThatDoesNotExist() {
         //Arrange
-        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
+        when(mockPeopleServiceClient.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(new ValidationDTO(true));
         when(projectServiceClient.validateProject(testTimeEntry.getProjectId())).thenReturn(new ValidationDTO(false));
 
         //Act
@@ -90,7 +90,7 @@ class TimeServiceTest {
     @Test
     void shouldThrowValidationException_whenGivenTimeEntryWithTaskIdThatDoesNotExist() {
         //Arrange
-        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(true);
+        when(mockPeopleServiceClient.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(new ValidationDTO(true));
         when(projectServiceClient.validateProject(testTimeEntry.getProjectId())).thenReturn(new ValidationDTO(true));
         when(projectServiceClient.validateTask(testTimeEntry.getProjectId(), testTimeEntry.getTaskId())).thenReturn(new ValidationDTO(false));
 
@@ -103,7 +103,7 @@ class TimeServiceTest {
     @Test
     void shouldThrowValidationException_whenGivenTimeEntryWithInvalidEmployeeId() {
         //Arrange
-        when(mockEmployeeResource.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(false);
+        when(mockPeopleServiceClient.validateEmployee(testTimeEntry.getEmployeeId())).thenReturn(new ValidationDTO(false));
 
         //Act and Assert
         assertThrows(ValidationException.class, () -> {

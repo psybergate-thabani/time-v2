@@ -2,7 +2,9 @@ package com.psybergate.resoma.time.controller;
 
 import com.psybergate.resoma.time.entity.TimeEntry;
 import com.psybergate.resoma.time.service.TimeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +13,7 @@ import javax.validation.ValidationException;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @CrossOrigin("*")
 @RequestMapping(path = "/api/time")
@@ -18,6 +21,9 @@ public class TimeController {
 
     @Autowired
     private TimeService timeService;
+
+    @Value("${eureka.instance.instance-id}")
+    private String instanceId;
 
     @PostMapping("v1/time-entries")
     public ResponseEntity<TimeEntry> captureTimeEntry(@RequestBody @Valid TimeEntry timeEntry) {
@@ -38,6 +44,7 @@ public class TimeController {
 
     @GetMapping(value = "v1/time-entries", params = {"deleted"})
     public ResponseEntity<List<TimeEntry>> retrieveTimeEntries(@RequestParam("deleted") Boolean deleted) {
+        log.info("Instance Id: {}", instanceId);
         return ResponseEntity.ok(timeService.retrieveEntries(deleted));
     }
 
